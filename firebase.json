@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"healthapp-99fec","appId":"1:332099291710:android:fd55e60d94dd0b41eddf6f","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"healthapp-99fec","configurations":{"android":"1:332099291710:android:fd55e60d94dd0b41eddf6f","web":"1:332099291710:web:fc56a6eae529a36deddf6f"}}}}}}
