@@ -2,25 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
   SignUpPage({super.key, required this.onPressed});
   final void Function() onPressed;
+
+  @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
   final emailController = TextEditingController();
   final passController = TextEditingController();
   final nameController = TextEditingController();
-  Future<void> createUser() async{
-    final user = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: emailController.text.trim(), password: passController.text.trim());
-    await FirebaseFirestore.instance.collection('userData').doc(user.user!.uid).set({
-      "name" : nameController.text.trim(),
+  final phoneController = TextEditingController(); // <-- Phone controller
+  bool isDoctor = false;
+
+  Future<void> createUser() async {
+    final user = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passController.text.trim());
+
+    await FirebaseFirestore.instance
+        .collection('userData')
+        .doc(user.user!.uid)
+        .set({
+      "name": nameController.text.trim(),
+      "isDoctor": isDoctor,
+      "phone": phoneController.text.trim(), // <-- Save phone number
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -55,8 +74,6 @@ class SignUpPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Password field
               TextFormField(
                 controller: passController,
                 obscureText: true,
@@ -68,16 +85,50 @@ class SignUpPage extends StatelessWidget {
                   prefixIcon: const Icon(Icons.lock),
                 ),
               ),
+              const SizedBox(height: 16),
+              
+              // Phone number field
+              TextFormField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  labelText: "Phone Number",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: const Icon(Icons.phone),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Doctor switch
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Doctor: ",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  Switch(
+                    value: isDoctor,
+                    onChanged: (value) {
+                      setState(() {
+                        isDoctor = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
               const SizedBox(height: 24),
 
-              // Sign Up button
               ElevatedButton(
-                onPressed: () async{
-                  try{
+                onPressed: () async {
+                  try {
                     await createUser();
-                  }on FirebaseAuthException catch(e){
-                    if(!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message!)));
+                  } on FirebaseAuthException catch (e) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(e.message!)));
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -93,13 +144,12 @@ class SignUpPage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Already a user? Log in
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text("Already a user? "),
                   GestureDetector(
-                    onTap: onPressed,
+                    onTap: widget.onPressed,
                     child: Text(
                       "Log in",
                       style: TextStyle(
